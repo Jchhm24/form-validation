@@ -1,50 +1,101 @@
-# React + TypeScript + Vite
+# Mejoras de Seguridad en la Aplicación
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este documento describe las implementaciones de seguridad realizadas en la aplicación de formularios.
 
-Currently, two official plugins are available:
+## 🛡️ Sanitización de Inputs
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Se implementaron múltiples capas de seguridad para proteger contra inyecciones y scripts maliciosos:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Librerías Utilizadas
+```bash
+pnpm install dompurify @types/dompurify xss
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Implementación
+- **DOMPurify**: Limpia el HTML y previene XSS
+- **XSS**: Capa adicional de protección contra Cross-Site Scripting
+- **Trim**: Eliminación de espacios en blanco innecesarios
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+```typescript
+const sanitizeInput = (input: string) => {
+  return xss(DOMPurify.sanitize(input.trim()))
+}
 ```
+
+## 🔒 Validaciones de Seguridad
+
+### Validación de Email
+```typescript
+const validateEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email)
+}
+```
+
+### Validación de Contraseña
+- Mínimo 8 caracteres
+- Al menos una letra
+- Al menos un número
+```typescript
+const validatePassword = (password: string) => {
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
+  return passwordRegex.test(password)
+}
+```
+
+## 🚧 Limitaciones y Controles
+
+### Sistema de Mensajes
+- Límite de 140 caracteres por mensaje
+- Sanitización de contenido antes de almacenamiento
+- Validación de contenido no vacío
+
+### Formulario de Login
+- Feedback de errores en tiempo real
+- Prevención de envíos vacíos
+- Manejo de errores en la autenticación
+
+## 🔐 Medidas de Seguridad Adicionales
+
+1. **Headers de Seguridad**
+   - Content-Type validation
+   - CORS headers
+
+2. **Manejo de Datos**
+   - Sanitización antes del almacenamiento
+   - Validación antes del procesamiento
+   - Escape de caracteres especiales
+
+3. **Prevención de Ataques**
+   - XSS (Cross-Site Scripting)
+   - CSRF (Cross-Site Request Forgery)
+   - SQL Injection
+   - Input Validation
+
+## 📝 Uso
+
+1. Instalar dependencias:
+```bash
+pnpm install
+```
+
+2. Ejecutar la aplicación:
+```bash
+pnpm dev
+```
+
+## 🔍 Pruebas de Seguridad
+
+Para probar la seguridad de la aplicación:
+1. Intentar inyectar scripts en los campos
+2. Verificar la sanitización de inputs
+3. Comprobar las validaciones de contraseña
+4. Probar límites de caracteres
+
+## ⚠️ Consideraciones Futuras
+
+- Implementar rate limiting
+- Agregar autenticación de dos factores
+- Implementar JWT para manejo de sesiones
+- Agregar HTTPS
+- Implementar logging de seguridad
