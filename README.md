@@ -83,19 +83,3 @@ pnpm install
 ```bash
 pnpm dev
 ```
-
-## 🔍 Pruebas de Seguridad
-
-Para probar la seguridad de la aplicación:
-1. Intentar inyectar scripts en los campos
-2. Verificar la sanitización de inputs
-3. Comprobar las validaciones de contraseña
-4. Probar límites de caracteres
-
-## ⚠️ Consideraciones Futuras
-
-- Implementar rate limiting
-- Agregar autenticación de dos factores
-- Implementar JWT para manejo de sesiones
-- Agregar HTTPS
-- Implementar logging de seguridad
