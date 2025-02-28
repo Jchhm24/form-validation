@@ -1,11 +1,19 @@
 import { useState } from 'react'
 import { LoginForm } from './components/LoginForm'
 import './App.css'
+import xss from 'xss'
+import DOMPurify from 'dompurify'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [messages, setMessages] = useState<string[]>([])
   const [newMessage, setNewMessage] = useState('')
+
+
+  const sanitizeInput = (input:string) => {
+    // TODO: Sanitizamos el input usando el módulo xss y DOMPurify
+    return xss(DOMPurify.sanitize(input))
+  }
 
   const handleLogin = () => {
     setIsAuthenticated(true)
@@ -13,6 +21,21 @@ function App() {
 
   const handleMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // TODO: Sanitizamos el mensaje antes de que se guarde
+    const sanitizedMessage = sanitizeInput(newMessage)
+
+    if(!sanitizedMessage){
+      alert('Por favor ingrese un mensaje que sea valido')
+      return
+    }
+
+    // Le establecemso un limite al mensaje
+    if(sanitizedMessage.length > 140){
+      alert('El mensaje no puede tener más de 140 caracteres')
+      return 
+    }
+
     setMessages([...messages, newMessage])
     setNewMessage('')
   }
